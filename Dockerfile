@@ -1,15 +1,15 @@
-FROM image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:4.x
+FROM image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
 
 # Labels consumed by Red Hat build service
-LABEL base.name="ods/jenkins-agent-base:4.x" \
-    description="The Jenkins Agent Node.js image has the Node.js and npm tools on top of the ODS Jenkins Agent Base Image." \
+LABEL base.name="openshift/jenkins-agent-base:latest" \
+    description="The Jenkins Agent Node.js image has the Node.js and npm tools on top of the openshift Jenkins Agent Base Image." \
     io.k8s.display-name="Jenkins Agent Node.js" \
     io.openshift.tags="openshift,jenkins,agent,nodejs" \
     maintainer="Simon Golms <development@gol.ms>" \
-    name="ods-jenkins-agent-nodejs-ubi8" \
+    name="openshift-jenkins-agent-nodejs-ubi8" \
     release="1" \
     summary="Provides the latest release of Jenkins Agent Node.js Universal Base Image 8." \
-    version="2.1.0"
+    version="main"
 
 ARG NEXUS_AUTH
 ARG NEXUS_URL
@@ -21,9 +21,9 @@ ENV LANG=en_US.UTF-8 \
     NPM_CONFIG_PREFIX=$HOME/.npm-global \
     PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$PATH
 
-# The BaseImage in my ODS instance is still delivered with the CentOS 8 repository
+# The BaseImage in my openshift instance is still delivered with the CentOS 8 repository
 # This leads to failures when installing additional packages.
-# As a bugfix it is enough to remove it. https://github.com/opendevstack/ods-core/pull/1106
+# As a bugfix it is enough to remove it. https://github.com/opendevstack/openshift-core/pull/1106
 RUN rm -f /etc/yum.repos.d/centos8.repo
 
 # Build image with the latest (security) updates
