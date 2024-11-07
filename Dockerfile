@@ -50,7 +50,7 @@ RUN echo node version: $(node --version) && \
     echo npx version: $(npx --version)
 
 # Clean dnf cache to reduce size
-RUN dnf autoremove && dnf clean all
+# RUN dnf autoremove && dnf clean all
 
 # Fix permissions
 RUN chgrp -R 0 $HOME && \
