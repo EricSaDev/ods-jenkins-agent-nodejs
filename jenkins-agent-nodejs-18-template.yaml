@@ -6,9 +6,9 @@ metadata:
     description: This template deploys a Jenkins agent to build Node.js v18.x based projects, through npm and npx v8.x
     iconClass: icon-jenkins
     openshift.io/display-name: Jenkins Agent Node.js (v18.x)
-    openshift.io/documentation-url: https://github.com/simongolms/ods-jenkins-agent-nodejs
+    openshift.io/documentation-url: https://github.com/ericsadev/ods-jenkins-agent-nodejs
     openshift.io/provider-display-name: Simon Golms
-    openshift.io/support-url: https://github.com/simongolms/ods-jenkins-agent-nodejs
+    openshift.io/support-url: https://github.com/ericsadev/ods-jenkins-agent-nodejs
     tags: "jenkins,agent,nodejs"
   labels:
     template: jenkins-agent-nodejs-18
@@ -44,7 +44,7 @@ objects:
       source:
         git:
           ref: v2.1.0
-          uri: https://github.com/simongolms/ods-jenkins-agent-nodejs.git
+          uri: https://github.com/ericsadev/ods-jenkins-agent-nodejs.git
         type: Git
       strategy:
         dockerStrategy:
