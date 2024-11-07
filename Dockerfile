@@ -1,4 +1,4 @@
-FROM image-registry.openshift-image-registry.svc:5000/ods/jenkins-agent-base:4.x
+FROM image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:4.x
 
 # Labels consumed by Red Hat build service
 LABEL base.name="ods/jenkins-agent-base:4.x" \
