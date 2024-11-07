@@ -43,7 +43,7 @@ objects:
           name: jenkins-agent-nodejs-18:latest
       source:
         git:
-          ref: v2.1.0
+          ref: main
           uri: https://github.com/ericsadev/ods-jenkins-agent-nodejs.git
         type: Git
       strategy:
