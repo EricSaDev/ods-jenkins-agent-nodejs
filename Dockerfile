@@ -54,7 +54,8 @@ RUN echo node version: $(node --version) && \
 
 # Fix permissions
 RUN chgrp -R 0 $HOME && \
-    chmod -R g=u $HOME && \
-    chmod g+w $JAVA_HOME/lib/security/cacerts
+    chmod -R g=u $HOME 
+    # && \
+    # chmod g+w $JAVA_HOME/lib/security/cacerts
 
 USER 1001
