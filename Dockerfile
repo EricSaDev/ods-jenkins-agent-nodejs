@@ -1,61 +1,47 @@
 FROM image-registry.openshift-image-registry.svc:5000/openshift/jenkins-agent-base:latest
+# FROM openshift/ose-jenkins-agent-base:v4.10.0.20230828.162821
+ENV __doozer=update BUILD_RELEASE=202308281624.p0.ge654cfb.assembly.stream BUILD_VERSION=v4.10.0 OS_GIT_MAJOR=4 OS_GIT_MINOR=10 OS_GIT_PATCH=0 OS_GIT_TREE_STATE=clean OS_GIT_VERSION=4.10.0-202308281624.p0.ge654cfb.assembly.stream SOURCE_GIT_TREE_STATE=clean __doozer_group=openshift-4.10 __doozer_key=ose-jenkins-agent-nodejs-12 
+ENV __doozer=merge OS_GIT_COMMIT=e654cfb OS_GIT_VERSION=4.10.0-202308281624.p0.ge654cfb.assembly.stream-e654cfb SOURCE_DATE_EPOCH=1686109079 SOURCE_GIT_COMMIT=e654cfb2806b535132e605917d8f5430a2606499 SOURCE_GIT_TAG=e654cfb2 SOURCE_GIT_URL=https://github.com/openshift/jenkins 
+
+MAINTAINER OpenShift Developer Services <openshift-dev-services+jenkins@redhat.com>
 
 # Labels consumed by Red Hat build service
-LABEL base.name="openshift/jenkins-agent-base:latest" \
-    description="The Jenkins Agent Node.js image has the Node.js and npm tools on top of the openshift Jenkins Agent Base Image." \
-    io.k8s.display-name="Jenkins Agent Node.js" \
-    io.openshift.tags="openshift,jenkins,agent,nodejs" \
-    maintainer="Simon Golms <development@gol.ms>" \
-    name="openshift-jenkins-agent-nodejs-ubi8" \
-    release="1" \
-    summary="Provides the latest release of Jenkins Agent Node.js Universal Base Image 8." \
-    version="main"
 
-ARG NEXUS_AUTH
-ARG NEXUS_URL
-ARG NODEJS_VERSION
-ARG NPM_VERSION
-
-ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
+ENV NODEJS_VERSION=18 \
     NPM_CONFIG_PREFIX=$HOME/.npm-global \
-    PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$PATH
+    PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$PATH \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
 
-# The BaseImage in my openshift instance is still delivered with the CentOS 8 repository
-# This leads to failures when installing additional packages.
-# As a bugfix it is enough to remove it. https://github.com/opendevstack/openshift-core/pull/1106
-RUN rm -f /etc/yum.repos.d/centos8.repo
+COPY contrib/bin/configure-agent /usr/local/bin/configure-agent
 
-# Build image with the latest (security) updates
-RUN dnf -y update
+# Install NodeJS
+RUN INSTALL_PKGS="nodejs nodejs-nodemon make gcc-c++" && \
+    yum module enable -y nodejs:${NODEJS_VERSION} && \
+    yum install -y --setopt=tsflags=nodocs --disableplugin=subscription-manager $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
+    yum update -y && \
+    yum clean all -y
 
-# Install Node.js and npm
-# https://github.com/nodesource/distributions#installation-instructions-1
-RUN curl --silent --show-error --location https://rpm.nodesource.com/setup_${NODEJS_VERSION} | bash - && \
-    dnf install -y nodejs && \
-    if [ ! -z "$NPM_VERSION" ]; then npm install -g npm@${NPM_VERSION}; fi
-
-# Configure npm
-RUN if [ ! -z "$NEXUS_AUTH" ] && [ ! -z "$NEXUS_URL" ]; then \
-    npm config set _auth=$(echo -n $NEXUS_AUTH | base64) && \
-    npm config set always-auth=true && \
-    npm config set registry=$NEXUS_URL/repository/npmjs/; \
-    fi && \
-    npm config set ca=null && \
-    npm config set strict-ssl=false
-
-# Verify installation
-RUN echo node version: $(node --version) && \
-    echo npm version: $(npm --version) && \
-    echo npx version: $(npx --version)
-
-# Clean dnf cache to reduce size
-# RUN dnf autoremove && dnf clean all
-
-# Fix permissions
-RUN chgrp -R 0 $HOME && \
-    chmod -R g=u $HOME 
-    # && \
-    # chmod g+w $JAVA_HOME/lib/security/cacerts
+RUN chown -R 1001:0 $HOME && \
+    chmod -R g+rw $HOME
 
 USER 1001
+
+LABEL \
+        com.redhat.component="ose-jenkins-agent-nodejs-12-container" \
+        name="openshift/ose-jenkins-agent-nodejs" \
+        architecture="x86_64" \
+        io.k8s.display-name="Jenkins Agent Nodejs" \
+        io.k8s.description="The jenkins agent nodejs image has the nodejs tools on top of the jenkins agent base image." \
+        io.openshift.tags="openshift,jenkins,agent,nodejs" \
+        maintainer="openshift-dev-services+jenkins@redhat.com" \
+        License="GPLv2+" \
+        vendor="Red Hat" \
+        io.openshift.maintainer.project="OCPBUGS" \
+        io.openshift.maintainer.component="Jenkins" \
+        release="202308281624.p0.ge654cfb.assembly.stream" \
+        io.openshift.build.commit.id="e654cfb2806b535132e605917d8f5430a2606499" \
+        io.openshift.build.source-location="https://github.com/openshift/jenkins" \
+        io.openshift.build.commit.url="https://github.com/openshift/jenkins/commit/e654cfb2806b535132e605917d8f5430a2606499" \
+        version="v4.10.0"
